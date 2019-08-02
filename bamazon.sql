@@ -14,4 +14,4 @@ CREATE TABLE products (
 );
 
 INSERT INTO products (product_name, department_name, price, stock_quantity)
-VALUES ("test", "electronics", 20, 100)
+VALUES ("Logitech C920 webcam", "Electronics", 56.00, 100), ("AMD Ryzen 7 2700X", "Electronics", 251.89, 8), ("Bed Pillow", "Home", 44.85, 290)
