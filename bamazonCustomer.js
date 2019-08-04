@@ -9,14 +9,11 @@ let connection = mysql.createConnection({
     database: "bamazon"
 });
 
-console.log('Current items in bamazon database');
 connection.query("SELECT * FROM products", function(err, res){
-    let chosenItem;
-    if (err) throw err;
-    for (var i=0; i < res.length; i++){
-        chosenItem = res[i];
-        console.log(res[i]);
+    for (var i=0; i < res.length; i++) {
+        console.log(res[i])
     }
+    if (err) throw err;
     inquirer.prompt([
         {
             type: "input",
@@ -29,14 +26,19 @@ connection.query("SELECT * FROM products", function(err, res){
             message: "How many would you like to purchase?"
         }
     ]).then(answers => {
-        console.log(answers.productChoice, answers.purchaseAmount);
-        console.log('updating database...');
-        if (parseInt(answers.purchaseAmount < chosenItem.stock_quantity)) {
+        let chosenItem;
+        for (var i=0; i < res.length; i++){
+            if (res[i].id == answers.productChoice){
+                chosenItem = res[i];
+            }
+        }
+        if (answers.purchaseAmount < chosenItem.stock_quantity) {
+            let difference = chosenItem.stock_quantity - answers.purchaseAmount
             connection.query(
                 "UPDATE products SET ? WHERE ?",
                 [
                     {
-                        stock_quantity: answers.purchaseAmount
+                        stock_quantity: difference
                     },
                     {
                         id: answers.productChoice
@@ -44,12 +46,14 @@ connection.query("SELECT * FROM products", function(err, res){
                 ],
                 function (err, res) {
                     if (err) throw err;
-                    console.log(`${res.affectedRows} purchased!\n`);
+                    let finalPrice = chosenItem.price * answers.purchaseAmount
+                    console.log(`\n********************************************\n\n${answers.purchaseAmount} ${chosenItem.product_name}(s) will be $${finalPrice}!\n\n********************************************\n`);
                     connection.end();
                 }
             )
-            console.log(answers)
-
+        } else {
+            console.log(`\n********************************************\n\nInsufficient quantity! Please try again.\n\n********************************************\n`)
+            connection.end();
         }
     })
 })
